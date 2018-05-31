@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">GalleryImagesUpload</string> <string name="without_permissions">Without Permissions</string>
+    <string name="it_looks_you_locked_permissions_">
+        It looks you didn\'t allow this app to use your
+        camera or external storage. This is necessary to take pictures and save then to your
+        devices. Please go to permissions screen, find MyInsta and unlock this permissions to
+        use the app.</string>
+    <string name="media_unavailable">Media Unavailable</string>
+    <string name="external_storage_unavailable_pls_">
+        Your external storage is unavailable. Please make sure you are not connected to a pc or
+        sd card was not removed.</string>
+    <string name="your_have_no_space_available_pls_">
+        You have few space available, please make sure your have more than 5MB on disk to
+        take pictures!</string>
+    <string name="no_few_space_on_disk">Few space on disk</string>
+    <string name="file_system_error">File System Unavailable</string>
+    <string name="something_went_wrong_during_file_">Something went wrong during file creation, please try again and make sure you have disk space and enough power before taking pictures!</string>
+</resources>
