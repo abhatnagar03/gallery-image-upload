@@ -1,6 +1,7 @@
 package com.assignment.spark.galleryimagesupload.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -13,29 +14,26 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.assignment.spark.galleryimagesupload.R;
-import com.assignment.spark.galleryimagesupload.adapter.AdapterExample;
+import com.assignment.spark.galleryimagesupload.adapter.BaseAdapter;
+import com.assignment.spark.galleryimagesupload.interfaces.INavigate;
 import com.assignment.spark.galleryimagesupload.presenter.ItemPresenter;
 import com.assignment.spark.galleryimagesupload.presenter.RecyclerItemClickListener;
 import com.assignment.spark.galleryimagesupload.utils.Constants;
 import com.assignment.spark.galleryimagesupload.view.ItemView;
 import com.assignment.spark.galleryimagesupload.widget.ItemOffsetDecoration;
-import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +46,7 @@ import butterknife.OnClick;
 import static android.app.Activity.RESULT_OK;
 
 public abstract class BaseFragment extends Fragment implements ItemView,
-        SwipeRefreshLayout.OnRefreshListener, RecyclerItemClickListener {
+        RecyclerItemClickListener {
 
     private static final int REQUEST_CODE_CHECK_PERMISSIONS = 1001;
     private static final int REQUEST_CODE_TAKE_PICTURE = 1002;
@@ -56,10 +54,6 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     static String[] permissions = new String[]{
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-    @Bind(R.id.picture)
-    ImageView picturePlaceHolder;
-    @Bind(R.id.swipe_container)
-    SwipeRefreshLayout swipeRefreshLayout;
     @Bind(R.id.recycler_view)
     RecyclerView recyclerView;
 
@@ -71,7 +65,8 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     private Uri uri;
 
     private RecyclerView.Adapter adapter;
-    private LinearLayoutManager layoutManager;
+    private GridLayoutManager layoutManager;
+    private INavigate iNavigate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,25 +83,34 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        itemPresenter.onResume(0);
+        showGallery();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            iNavigate = (INavigate) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement ItemInteractionCallback and ISetTitle");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        iNavigate = null;
     }
 
     private void setupRecyclerView() {
         if (getLayoutManager() != null) {
-            layoutManager = (LinearLayoutManager) getLayoutManager();
+            layoutManager = (GridLayoutManager) getLayoutManager();
             recyclerView.setLayoutManager(layoutManager);
         }
 
         recyclerView.addItemDecoration(new ItemOffsetDecoration(recyclerView.getContext(), R.dimen.item_decoration));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-    }
-
-    private void setupSwipeRefreshLayout() {
-        swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary,
-                android.R.color.holo_green_dark,
-                android.R.color.holo_orange_dark,
-                android.R.color.holo_blue_dark);
     }
 
     @Override
@@ -266,6 +270,11 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     }
 
     @Override
+    public void navigateToPreviewActivity() {
+        iNavigate.navigate(uri);
+    }
+
+    @Override
     public void showProgress() {
 
     }
@@ -290,36 +299,28 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         itemPresenter.onCaptureBtnClick();
     }
 
-    @OnClick(R.id.show_gallery)
     public void showGallery() {
-        swipeRefreshLayout.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
 
         setupRecyclerView();
-
-        setupSwipeRefreshLayout();
 
         File file = getEnvFilePath();
         adapter = getAdapter(Arrays.asList(file.listFiles()));
         recyclerView.setAdapter(adapter);
-//        if (adapter instanceof AdapterExample) {
-//            ((AdapterExample) adapter).removeLoadingFooter();
-
-            if (adapter instanceof AdapterExample) {
-                ((AdapterExample) adapter).setRecyclerItemClickListener(this);
-            }
-//        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_TAKE_PICTURE && resultCode == RESULT_OK) {
-            Glide.with(getContext()).load(uri).into(picturePlaceHolder);
-            itemPresenter.saveImage(uri);
+        if (adapter instanceof BaseAdapter) {
+            ((BaseAdapter) adapter).setRecyclerItemClickListener(this);
         }
     }
 
     @Override
-    public void onRefresh() {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_TAKE_PICTURE) {
+            if (resultCode == RESULT_OK) {
+                itemPresenter.onPhotoClicked();
+            } else {
+                new File(uri.getPath()).delete();
+            }
+        }
     }
 
     protected abstract int getLayout();

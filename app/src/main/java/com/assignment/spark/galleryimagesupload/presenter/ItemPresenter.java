@@ -29,8 +29,8 @@ public class ItemPresenter implements Presenter<ItemView> {
     }
 
     @Override
-    public void detachView() {
-        itemView = null;
+    public void onPhotoClicked() {
+        itemView.navigateToPreviewActivity();
     }
 
     @Override
@@ -96,10 +96,5 @@ public class ItemPresenter implements Presenter<ItemView> {
     public void permissionDenied() {
         if(itemView.shouldShowDialog()) itemView.showPermissionDialog();
         else itemView.showUnlockPermissionsDialog();
-    }
-
-    @Override
-    public void saveImage(Uri uri) {
-
     }
 }

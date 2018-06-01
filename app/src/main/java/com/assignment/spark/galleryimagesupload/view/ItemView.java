@@ -43,4 +43,5 @@ public interface ItemView {
 
     void showErrorDialog();
 
+    void navigateToPreviewActivity();
 }

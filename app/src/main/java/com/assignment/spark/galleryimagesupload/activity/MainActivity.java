@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.assignment.spark.galleryimagesupload.R;
 import com.assignment.spark.galleryimagesupload.fragment.TilesFragment;
+import com.assignment.spark.galleryimagesupload.interfaces.INavigate;
+import com.assignment.spark.galleryimagesupload.utils.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +30,7 @@ import java.util.UUID;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements INavigate {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,5 +39,14 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, TilesFragment.newInstance()).commit();
+    }
+
+    @Override
+    public void navigate(Uri uri) {
+        Intent intent = new Intent(MainActivity.this, PreviewActivity.class);
+        Bundle b = new Bundle();
+        b.putParcelable(Constants.URI, uri);
+        intent.putExtras(b);
+        startActivity(intent);
     }
 }

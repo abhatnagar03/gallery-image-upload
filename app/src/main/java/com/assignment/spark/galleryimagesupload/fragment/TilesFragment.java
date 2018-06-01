@@ -1,11 +1,11 @@
 package com.assignment.spark.galleryimagesupload.fragment;
 
 
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.assignment.spark.galleryimagesupload.R;
-import com.assignment.spark.galleryimagesupload.adapter.AdapterExample;
+import com.assignment.spark.galleryimagesupload.adapter.BaseAdapter;
 
 import java.io.File;
 import java.util.List;
@@ -26,18 +26,17 @@ public class TilesFragment extends BaseFragment {
 
     @Override
     protected RecyclerView.LayoutManager getLayoutManager() {
-        return getLinearLayoutManager();
+        return getGridLayoutManager();
     }
 
     @Override
     protected RecyclerView.Adapter getAdapter(List<File> itemList) {
-        return new AdapterExample(getActivity(), itemList, R.layout.item_type_main);
+        return new BaseAdapter(getActivity(), itemList, R.layout.item_type_main);
     }
 
-    private LinearLayoutManager getLinearLayoutManager() {
-        return new LinearLayoutManager(
+    private GridLayoutManager getGridLayoutManager() {
+        return new GridLayoutManager(
                 getActivity(),
-                LinearLayoutManager.VERTICAL,
-                false);
+                2);
     }
 }

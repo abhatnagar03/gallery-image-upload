@@ -11,7 +11,7 @@ public interface Presenter <V> {
 
     void attachedView(V view);
 
-    void detachView();
+    void onPhotoClicked();
 
     void onResume(int currentPage);
 
@@ -23,5 +23,4 @@ public interface Presenter <V> {
 
     void permissionDenied();
 
-    void saveImage(Uri uri);
 }
