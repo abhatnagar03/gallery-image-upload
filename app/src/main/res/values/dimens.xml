@@ -11,6 +11,7 @@
     <dimen name="scan_padding">18dp</dimen>
     <dimen name="rotate_btn_size">50dp</dimen>
     <dimen name="accept_btn_size">60dp</dimen>
-    <dimen name="size_20">20sp</dimen>
+    <dimen name="text_size_heading_20">20sp</dimen>
     <dimen name="gallery_item_size">150dp</dimen>
+    <dimen name="text_size_heading_13.5">13.5sp</dimen>
 </resources>

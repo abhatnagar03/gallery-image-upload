@@ -5,4 +5,6 @@ package com.assignment.spark.galleryimagesupload.interfaces;
  */
 public interface INavigate {
     void openPreviewActivity(String uri);
+
+    void openDisplayActivity(String uri);
 }

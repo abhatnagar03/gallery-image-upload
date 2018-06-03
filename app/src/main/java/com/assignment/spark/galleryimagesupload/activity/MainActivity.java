@@ -33,6 +33,15 @@ public class MainActivity extends AppCompatActivity implements INavigate {
     }
 
     @Override
+    public void openDisplayActivity(String uri) {
+        Intent intent = new Intent(MainActivity.this, DisplayActivity.class);
+        Bundle b = new Bundle();
+        b.putString(Constants.URI, uri);
+        intent.putExtras(b);
+        startActivity(intent);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         android.support.v4.app.Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);

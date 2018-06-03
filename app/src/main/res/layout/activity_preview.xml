@@ -28,6 +28,16 @@
             android:layout_height="@dimen/rotate_btn_size"
             android:layout_centerHorizontal="true"
             android:src="@drawable/rotate_btn" />
+
+        <TextView
+            android:id="@+id/crop_accept_btn_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/rotate_btn"
+            android:text="@string/rotate"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/text_size_heading_13.5" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -41,6 +51,15 @@
             android:layout_height="@dimen/rotate_btn_size"
             android:layout_centerHorizontal="true"
             android:src="@drawable/crop_btn" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/crop_btn"
+            android:text="@string/accept_crop"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/text_size_heading_13.5" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -54,5 +73,14 @@
             android:layout_height="@dimen/accept_btn_size"
             android:layout_centerHorizontal="true"
             android:src="@drawable/accept" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/accept_btn"
+            android:text="@string/accept_original"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/text_size_heading_13.5" />
     </RelativeLayout>
 </FrameLayout>

@@ -366,7 +366,7 @@ public abstract class BaseFragment extends Fragment implements MainGalleryView,
 
     @Override
     public void showDetails(int position) {
-        iNavigate.openPreviewActivity(getEnvFilePath().listFiles()[position].getAbsolutePath());
+        iNavigate.openDisplayActivity(getEnvFilePath().listFiles()[position].getAbsolutePath());
     }
 
     protected abstract int getLayout();

@@ -21,4 +21,8 @@
     <string name="no_few_space_on_disk">Few space on disk</string>
     <string name="file_system_error">File System Unavailable</string>
     <string name="something_went_wrong_during_file_">Something went wrong during file creation, please try again and make sure you have disk space and enough power before taking pictures!</string>
+    <string name="rotate">Rotate</string>
+    <string name="accept_crop">Accept Crop</string>
+    <string name="accept_original">Accept Original</string>
+    <string name="save_to_gallery">Save in Gallery</string>
 </resources>
