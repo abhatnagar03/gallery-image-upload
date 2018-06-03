@@ -2,7 +2,7 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_margin="8dp"
+    android:layout_margin="@dimen/activity_margin_half"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -20,14 +20,27 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center">
+        android:layout_gravity="top|left">
 
         <ImageView
             android:id="@+id/rotate_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/rotate_btn_size"
+            android:layout_height="@dimen/rotate_btn_size"
             android:layout_centerHorizontal="true"
             android:src="@drawable/rotate_btn" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right">
+
+        <ImageView
+            android:id="@+id/crop_btn"
+            android:layout_width="@dimen/rotate_btn_size"
+            android:layout_height="@dimen/rotate_btn_size"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/crop_btn" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -37,8 +50,8 @@
 
         <ImageView
             android:id="@+id/accept_btn"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/accept_btn_size"
+            android:layout_height="@dimen/accept_btn_size"
             android:layout_centerHorizontal="true"
             android:src="@drawable/accept" />
     </RelativeLayout>

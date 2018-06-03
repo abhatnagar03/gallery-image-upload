@@ -9,4 +9,8 @@
 
     <dimen name="item_decoration">6dp</dimen>
     <dimen name="scan_padding">18dp</dimen>
+    <dimen name="rotate_btn_size">50dp</dimen>
+    <dimen name="accept_btn_size">60dp</dimen>
+    <dimen name="size_20">20sp</dimen>
+    <dimen name="gallery_item_size">150dp</dimen>
 </resources>

@@ -4,18 +4,17 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,11 +24,11 @@ import android.view.ViewGroup;
 import com.assignment.spark.galleryimagesupload.R;
 import com.assignment.spark.galleryimagesupload.adapter.BaseAdapter;
 import com.assignment.spark.galleryimagesupload.interfaces.INavigate;
-import com.assignment.spark.galleryimagesupload.presenter.ItemPresenter;
+import com.assignment.spark.galleryimagesupload.presenter.MainPresenterImpl;
 import com.assignment.spark.galleryimagesupload.presenter.RecyclerItemClickListener;
+import com.assignment.spark.galleryimagesupload.utils.CameraUtils;
 import com.assignment.spark.galleryimagesupload.utils.Constants;
-import com.assignment.spark.galleryimagesupload.view.ItemView;
-import com.assignment.spark.galleryimagesupload.widget.ItemOffsetDecoration;
+import com.assignment.spark.galleryimagesupload.view.MainGalleryView;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,12 +44,13 @@ import butterknife.OnClick;
 
 import static android.app.Activity.RESULT_OK;
 
-public abstract class BaseFragment extends Fragment implements ItemView,
+public abstract class BaseFragment extends Fragment implements MainGalleryView,
         RecyclerItemClickListener {
 
     private static final int REQUEST_CODE_CHECK_PERMISSIONS = 1001;
     private static final int REQUEST_CODE_GALLERY_PERMISSIONS = 1003;
     private static final int REQUEST_CODE_TAKE_PICTURE = 1002;
+    private static final int PICK_IMAGE_REQUEST = 1004;
 
     static String[] permissions = new String[]{
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -61,7 +61,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     @Bind(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private ItemPresenter itemPresenter;
+    private MainPresenterImpl mainPresenter;
     private AlertDialog unlockDialog;
     private AlertDialog disconnectDialog;
     private AlertDialog noSpaceDialog;
@@ -69,7 +69,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     private Uri uri;
 
     private RecyclerView.Adapter adapter;
-    private GridLayoutManager layoutManager;
+    protected GridLayoutManager layoutManager;
     private INavigate iNavigate;
     private String mCurrentPhotoPath;
 
@@ -78,8 +78,8 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         View rootView = inflater.inflate(getLayout(), container, false);
         ButterKnife.bind(this, rootView);
 
-        itemPresenter = new ItemPresenter();
-        itemPresenter.attachedView(this);
+        mainPresenter = new MainPresenterImpl();
+        mainPresenter.attachedView(this);
 
         return rootView;
     }
@@ -92,7 +92,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     @Override
     public void onResume() {
         super.onResume();
-        showGallery();
+        mainPresenter.loadInitialData();
     }
 
     @Override
@@ -112,14 +112,14 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         iNavigate = null;
     }
 
-    private void setupRecyclerView() {
-        if (getLayoutManager() != null) {
-            layoutManager = (GridLayoutManager) getLayoutManager();
-            recyclerView.setLayoutManager(layoutManager);
-        }
+    @OnClick(R.id.capture)
+    public void onCaptureBtnCLick() {
+        mainPresenter.onCaptureBtnClick();
+    }
 
-        recyclerView.addItemDecoration(new ItemOffsetDecoration(recyclerView.getContext(), R.dimen.item_decoration));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
+    @OnClick(R.id.gallery)
+    public void onGallryBtnClick() {
+        mainPresenter.onGalleryBtnClick();
     }
 
     @Override
@@ -159,21 +159,27 @@ public abstract class BaseFragment extends Fragment implements ItemView,
 
     public void handlePermissionResult(int requestCode, int[] grantResults) {
         if (requestCode == REQUEST_CODE_CHECK_PERMISSIONS) {
-            if (!allPermissionsGranted(grantResults)) {
-                itemPresenter.permissionDenied();
+            if (anyPermissionRejected(grantResults)) {
+                mainPresenter.permissionDenied();
             } else {
-                itemPresenter.onCaptureBtnClick();
+                mainPresenter.onCaptureBtnClick();
+            }
+        } else if (requestCode == REQUEST_CODE_GALLERY_PERMISSIONS) {
+            if (anyPermissionRejected(grantResults)) {
+                mainPresenter.galleryPermissionDenied();
+            } else {
+                mainPresenter.onGalleryBtnClick();
             }
         }
     }
 
-    private boolean allPermissionsGranted(int[] grantResults) {
+    private boolean anyPermissionRejected(int[] grantResults) {
         for (int result : grantResults) {
             if (result == PackageManager.PERMISSION_DENIED)
-                return false;
+                return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override
@@ -207,8 +213,15 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     }
 
     @Override
-    public String[] getPermissions() {
-        return permissions;
+    public void showUnlockGalleryPermissionsDialog() {
+        if (unlockDialog == null) {
+            unlockDialog = new AlertDialog.Builder(getContext())
+                    .setTitle(getString(R.string.without_permissions))
+                    .setMessage(getString(R.string.it_looks_you_locked_permissions_2_))
+                    .create();
+        }
+
+        unlockDialog.show();
     }
 
     @Override
@@ -279,7 +292,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
 
     @Override
     public void navigateToPreviewActivity() {
-        iNavigate.navigate(mCurrentPhotoPath);
+        iNavigate.openPreviewActivity(mCurrentPhotoPath);
     }
 
     @Override
@@ -297,49 +310,23 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     @Override
     public void showGalleryPermissionDialog() {
         ActivityCompat.requestPermissions(getActivity(),
-                permissions,
-                REQUEST_CODE_CHECK_PERMISSIONS);
+                galleryPermission,
+                REQUEST_CODE_GALLERY_PERMISSIONS);
     }
 
     @Override
     public void openDeviceGallery(File file) {
-
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
     @Override
-    public void showProgress() {
-
-    }
-
-    @Override
-    public void hideProgress() {
-
-    }
-
-    @Override
-    public void showDetails(int position) {
-
-    }
-
-    @Override
-    public void resetRefreshingLayout() {
-
-    }
-
-    @OnClick(R.id.capture)
-    public void onCaptureBtnCLick() {
-        itemPresenter.onCaptureBtnClick();
-    }
-
-    @OnClick(R.id.gallery)
-    public void onGallryBtnClick() {
-        itemPresenter.onGalleryBtnClick();
-    }
-
     public void showGallery() {
         recyclerView.setVisibility(View.VISIBLE);
 
-        setupRecyclerView();
+        setupRecyclerViewProperties();
 
         File file = getEnvFilePath();
         adapter = getAdapter(Arrays.asList(file.listFiles()));
@@ -353,11 +340,33 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_TAKE_PICTURE) {
             if (resultCode == RESULT_OK) {
-                itemPresenter.onPhotoClicked();
+                mainPresenter.onPhotoClicked();
             } else {
                 getContext().getContentResolver().delete(uri, null, null);
             }
+        } else if(requestCode == PICK_IMAGE_REQUEST) {
+            Bitmap mGalleryBitmap = null;
+            try {
+                mGalleryBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (null != mGalleryBitmap) {
+                CameraUtils.saveEnhancedBitmap(mGalleryBitmap, mCurrentPhotoPath);
+                mGalleryBitmap.recycle();
+                mainPresenter.onPhotoClicked();
+            }
         }
+    }
+
+    @Override
+    public void onItemClickListener(int position) {
+        mainPresenter.onItemSelected(position);
+    }
+
+    @Override
+    public void showDetails(int position) {
+        iNavigate.openPreviewActivity(getEnvFilePath().listFiles()[position].getAbsolutePath());
     }
 
     protected abstract int getLayout();
@@ -366,8 +375,5 @@ public abstract class BaseFragment extends Fragment implements ItemView,
 
     protected abstract RecyclerView.Adapter getAdapter(List<File> items);
 
-    @Override
-    public void onItemClickListener(int position) {
-
-    }
+    protected abstract void setupRecyclerViewProperties();
 }

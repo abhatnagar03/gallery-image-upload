@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements INavigate {
     }
 
     @Override
-    public void navigate(String uri) {
+    public void openPreviewActivity(String uri) {
         Intent intent = new Intent(MainActivity.this, PreviewActivity.class);
         Bundle b = new Bundle();
         b.putString(Constants.URI, uri);

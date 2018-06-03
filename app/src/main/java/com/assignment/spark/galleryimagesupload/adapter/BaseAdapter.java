@@ -63,7 +63,7 @@ public class BaseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     private RecyclerView.ViewHolder getItemViewHolder(ViewGroup parent, LayoutInflater inflater) {
         View view = inflater.inflate(itemLayout, parent, false);
-        return new ExampleHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -71,8 +71,9 @@ public class BaseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final File item = itemList.get(position);
         switch (getItemViewType(position)) {
             case ITEM:
-                final ExampleHolder exampleHolder = (ExampleHolder) holder;
-                Glide.with(context).load(FileProvider.getUriForFile(context, Constants.FILE_AUTHORITY, item)).into(exampleHolder.imageView);
+                final ViewHolder viewHolder = (ViewHolder) holder;
+                Glide.with(context).load(FileProvider.getUriForFile(context,
+                        Constants.FILE_AUTHORITY, item)).into(viewHolder.imageView);
                 break;
         }
     }
@@ -129,11 +130,11 @@ public class BaseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * Main list's content ViewHolder
      */
 
-    protected class ExampleHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @Bind(R.id.imageView)
         ImageView imageView;
 
-        ExampleHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);

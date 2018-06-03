@@ -4,7 +4,12 @@
     <string name="it_looks_you_locked_permissions_">
         It looks you didn\'t allow this app to use your
         camera or external storage. This is necessary to take pictures and save then to your
-        devices. Please go to permissions screen, find MyInsta and unlock this permissions to
+        devices. Please go to permissions screen, find Image Gallery and unlock these permissions to
+        use the app.</string>
+    <string name="it_looks_you_locked_permissions_2_">
+        It looks you didn\'t allow this app to read your
+        external storage. This is necessary to read pictures from gallery.
+        Please go to permissions screen, find Image Gallery and unlock this permissions to
         use the app.</string>
     <string name="media_unavailable">Media Unavailable</string>
     <string name="external_storage_unavailable_pls_">

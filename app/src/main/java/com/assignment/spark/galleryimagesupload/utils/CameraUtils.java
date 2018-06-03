@@ -1,136 +1,29 @@
 package com.assignment.spark.galleryimagesupload.utils;
 
 import android.graphics.Bitmap;
-import android.util.Log;
+import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.support.annotation.NonNull;
 
-
-import com.assignment.spark.galleryimagesupload.view.Quadrilateral;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import static org.opencv.core.CvType.CV_8UC1;
-import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
-import static org.opencv.imgproc.Imgproc.THRESH_OTSU;
+import java.util.Map;
 
 public class CameraUtils {
     private static final String TAG = CameraUtils.class.getSimpleName();
 
-    public static Quadrilateral detectLargestQuadrilateral(Mat mat) {
-        Mat mGrayMat = new Mat(mat.rows(), mat.cols(), CV_8UC1);
-        Imgproc.cvtColor(mat, mGrayMat, Imgproc.COLOR_BGR2GRAY, 4);
-        Imgproc.threshold(mGrayMat, mGrayMat, 150, 255, THRESH_BINARY + THRESH_OTSU);
-
-        List<MatOfPoint> largestContour = findLargestContour(mGrayMat);
-        if(null != largestContour) {
-            Quadrilateral mLargestRect = findQuadrilateral(largestContour);
-            if (mLargestRect != null)
-                return mLargestRect;
-        }
-        return null;
-    }
-
-    public static double getMaxCosine(double maxCosine, Point[] approxPoints) {
-        Log.i(TAG, "ANGLES ARE:");
-        for (int i = 2; i < 5; i++) {
-            double cosine = Math.abs(angle(approxPoints[i % 4], approxPoints[i - 2], approxPoints[i - 1]));
-            Log.i(TAG, String.valueOf(cosine));
-            maxCosine = Math.max(cosine, maxCosine);
-        }
-        return maxCosine;
-    }
-
-    public static double angle(Point p1, Point p2, Point p0) {
-        double dx1 = p1.x - p0.x;
-        double dy1 = p1.y - p0.y;
-        double dx2 = p2.x - p0.x;
-        double dy2 = p2.y - p0.y;
-        return (dx1 * dx2 + dy1 * dy2) / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
-    }
-
-    private static Point[] sortPoints(Point[] src ) {
-        ArrayList<Point> srcPoints = new ArrayList<>(Arrays.asList(src));
-        Point[] result = { null , null , null , null };
-
-        Comparator<Point> sumComparator = new Comparator<Point>() {
-            @Override
-            public int compare(Point lhs, Point rhs) {
-                return Double.valueOf(lhs.y + lhs.x).compareTo(rhs.y + rhs.x);
-            }
-        };
-
-        Comparator<Point> diffComparator = new Comparator<Point>() {
-
-            @Override
-            public int compare(Point lhs, Point rhs) {
-                return Double.valueOf(lhs.y - lhs.x).compareTo(rhs.y - rhs.x);
-            }
-        };
-
-        // top-left corner = minimal sum
-        result[0] = Collections.min(srcPoints, sumComparator);
-        // bottom-right corner = maximal sum
-        result[2] = Collections.max(srcPoints, sumComparator);
-        // top-right corner = minimal diference
-        result[1] = Collections.min(srcPoints, diffComparator);
-        // bottom-left corner = maximal diference
-        result[3] = Collections.max(srcPoints, diffComparator);
-
-        return result;
-    }
-
-    private static List<MatOfPoint> findLargestContour(Mat inputMat) {
-        Mat mHierarchy = new Mat();
-        List<MatOfPoint> mContourList = new ArrayList<>();
-        //finding contours
-        Imgproc.findContours(inputMat, mContourList, mHierarchy, Imgproc.RETR_EXTERNAL,
-                Imgproc.CHAIN_APPROX_SIMPLE);
-
-        Mat mContoursMat = new Mat();
-        mContoursMat.create(inputMat.rows(), inputMat.cols(), CvType.CV_8U);
-
-        if(mContourList.size() != 0) {
-            Collections.sort(mContourList, new Comparator<MatOfPoint>() {
-                @Override
-                public int compare(MatOfPoint lhs, MatOfPoint rhs) {
-                    return Double.valueOf(Imgproc.contourArea(rhs)).compareTo(Imgproc.contourArea(lhs));
-                }
-            });
-            return mContourList;
-        }
-        return null;
-    }
-
-    private static Quadrilateral findQuadrilateral(List<MatOfPoint> mContourList) {
-        for ( MatOfPoint c: mContourList ) {
-            MatOfPoint2f c2f = new MatOfPoint2f(c.toArray());
-            double peri = Imgproc.arcLength(c2f, true);
-            MatOfPoint2f approx = new MatOfPoint2f();
-            Imgproc.approxPolyDP(c2f, approx, 0.02 * peri, true);
-            Point[] points = approx.toArray();
-            // select biggest 4 angles polygon
-            if (approx.rows() == 4) {
-                Point[] foundPoints = sortPoints(points);
-                return new Quadrilateral( approx , foundPoints);
-            }
-        }
-        return null;
-    }
-
-    public static Bitmap enhanceReceipt(Bitmap image, Point topLeft, Point topRight, Point bottomLeft, Point bottomRight) {
+    public static Bitmap enhanceImage(Bitmap image, Point topLeft, Point topRight, Point bottomLeft, Point bottomRight) {
         int resultWidth = (int) (topRight.x - topLeft.x);
         int bottomWidth = (int) (bottomRight.x - bottomLeft.x);
         if (bottomWidth > resultWidth)
@@ -170,5 +63,61 @@ public class CameraUtils {
         Bitmap output = Bitmap.createBitmap(resultWidth, resultHeight, Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(outputMat, output);
         return output;
+    }
+
+    public static void saveEnhancedBitmap(Bitmap bitmap, String filePath) {
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(filePath);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+            // PNG is a lossless format, the compression factor (100) is ignored
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @NonNull
+    public static ArrayList<PointF> getPolygonDefaultPoints(Bitmap bmp) {
+        ArrayList<PointF> points;
+        points = new ArrayList<>();
+        points.add(new PointF(bmp.getWidth() * (0.09f), (float) bmp.getHeight() * (0.27f)));
+        points.add(new PointF(bmp.getWidth() * (0.91f), (float) bmp.getHeight() * (0.27f)));
+        points.add(new PointF(bmp.getWidth() * (0.09f), (float) bmp.getHeight() * (0.73f)));
+        points.add(new PointF(bmp.getWidth() * (0.91f), (float) bmp.getHeight() * (0.73f)));
+
+        return points;
+    }
+
+    public static Bitmap resize(Bitmap bm, int newWidth, int newHeight, int angle) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        if (angle > 0) {
+            matrix.postRotate(angle);
+        }
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
+    }
+
+    public static boolean isScanPointsValid(Map<Integer, PointF> points) {
+        return points.size() == 4;
     }
 }
