@@ -1,32 +1,14 @@
 package com.assignment.spark.galleryimagesupload.activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.assignment.spark.galleryimagesupload.R;
 import com.assignment.spark.galleryimagesupload.fragment.TilesFragment;
 import com.assignment.spark.galleryimagesupload.interfaces.INavigate;
 import com.assignment.spark.galleryimagesupload.utils.Constants;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
 
 import butterknife.ButterKnife;
 
@@ -42,11 +24,20 @@ public class MainActivity extends AppCompatActivity implements INavigate {
     }
 
     @Override
-    public void navigate(Uri uri) {
+    public void navigate(String uri) {
         Intent intent = new Intent(MainActivity.this, PreviewActivity.class);
         Bundle b = new Bundle();
-        b.putParcelable(Constants.URI, uri);
+        b.putString(Constants.URI, uri);
         intent.putExtras(b);
         startActivity(intent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        android.support.v4.app.Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        if (fragment instanceof TilesFragment) {
+            ((TilesFragment) fragment).handlePermissionResult(requestCode, grantResults);
+        }
     }
 }

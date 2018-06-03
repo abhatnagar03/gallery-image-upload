@@ -23,4 +23,5 @@ public interface Presenter <V> {
 
     void permissionDenied();
 
+    void onGalleryBtnClick();
 }

@@ -6,4 +6,8 @@
     <color name="textColorSecondary">#727272</color>
     <color name="selectable_pressed">#BDBDBD</color>
     <color name="darkBlue">#3F51B5</color>
+    <color name="black_with_thirty_five_percent_alpha">#59000000</color>
+    <color name="crop_green">#26d88c</color>
+    <color name= "orange">#ff9c00</color>
+    <color name="transparent">#00ffffff</color>
 </resources>

@@ -44,4 +44,10 @@ public interface ItemView {
     void showErrorDialog();
 
     void navigateToPreviewActivity();
+
+    boolean checkGalleryPermission();
+
+    void showGalleryPermissionDialog();
+
+    void openDeviceGallery(File file);
 }

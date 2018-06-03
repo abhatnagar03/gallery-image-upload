@@ -97,4 +97,25 @@ public class ItemPresenter implements Presenter<ItemView> {
         if(itemView.shouldShowDialog()) itemView.showPermissionDialog();
         else itemView.showUnlockPermissionsDialog();
     }
+
+    @Override
+    public void onGalleryBtnClick() {
+        if(!itemView.checkGalleryPermission()) {
+            itemView.showGalleryPermissionDialog();
+            return;
+        }
+
+        File file = itemView.newFile();
+
+        if(file == null) {
+            itemView.showErrorDialog();
+            return;
+        }
+
+        dispatchGAlleryIntent(file);
+    }
+
+    private void dispatchGAlleryIntent(File file) {
+        itemView.openDeviceGallery(file);
+    }
 }

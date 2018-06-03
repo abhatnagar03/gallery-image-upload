@@ -8,5 +8,5 @@
     <dimen name="activity_margin_half">8dp</dimen>
 
     <dimen name="item_decoration">6dp</dimen>
-
+    <dimen name="scan_padding">18dp</dimen>
 </resources>

@@ -22,4 +22,13 @@
         android:layout_margin="@dimen/activity_margin"
         android:src="@drawable/ic_camera_icon"
         app:fabSize="normal" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:layout_margin="@dimen/activity_margin"
+        android:src="@drawable/gallery_btn"
+        app:fabSize="normal" />
 </FrameLayout>

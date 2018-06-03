@@ -49,10 +49,14 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         RecyclerItemClickListener {
 
     private static final int REQUEST_CODE_CHECK_PERMISSIONS = 1001;
+    private static final int REQUEST_CODE_GALLERY_PERMISSIONS = 1003;
     private static final int REQUEST_CODE_TAKE_PICTURE = 1002;
 
     static String[] permissions = new String[]{
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    static String[] galleryPermission = new String[]{
+            Manifest.permission.READ_EXTERNAL_STORAGE};
 
     @Bind(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -67,6 +71,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     private RecyclerView.Adapter adapter;
     private GridLayoutManager layoutManager;
     private INavigate iNavigate;
+    private String mCurrentPhotoPath;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,7 +87,11 @@ public abstract class BaseFragment extends Fragment implements ItemView,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
         showGallery();
     }
 
@@ -148,10 +157,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         return file;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
+    public void handlePermissionResult(int requestCode, int[] grantResults) {
         if (requestCode == REQUEST_CODE_CHECK_PERMISSIONS) {
             if (!allPermissionsGranted(grantResults)) {
                 itemPresenter.permissionDenied();
@@ -246,11 +252,13 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         File storageDir =
                 getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         try {
-            return File.createTempFile(
+            File image = File.createTempFile(
                     imageFileName,  /* prefix */
                     ".jpg",         /* suffix */
                     storageDir      /* directory */
             );
+            mCurrentPhotoPath = image.getAbsolutePath();
+            return image;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -271,7 +279,31 @@ public abstract class BaseFragment extends Fragment implements ItemView,
 
     @Override
     public void navigateToPreviewActivity() {
-        iNavigate.navigate(uri);
+        iNavigate.navigate(mCurrentPhotoPath);
+    }
+
+    @Override
+    public boolean checkGalleryPermission() {
+        for (String p : galleryPermission) {
+            int result = ContextCompat.checkSelfPermission(getActivity(), p);
+
+            if (result != PackageManager.PERMISSION_GRANTED) return false;
+        }
+
+        return true;
+
+    }
+
+    @Override
+    public void showGalleryPermissionDialog() {
+        ActivityCompat.requestPermissions(getActivity(),
+                permissions,
+                REQUEST_CODE_CHECK_PERMISSIONS);
+    }
+
+    @Override
+    public void openDeviceGallery(File file) {
+
     }
 
     @Override
@@ -299,6 +331,11 @@ public abstract class BaseFragment extends Fragment implements ItemView,
         itemPresenter.onCaptureBtnClick();
     }
 
+    @OnClick(R.id.gallery)
+    public void onGallryBtnClick() {
+        itemPresenter.onGalleryBtnClick();
+    }
+
     public void showGallery() {
         recyclerView.setVisibility(View.VISIBLE);
 
@@ -318,7 +355,7 @@ public abstract class BaseFragment extends Fragment implements ItemView,
             if (resultCode == RESULT_OK) {
                 itemPresenter.onPhotoClicked();
             } else {
-                new File(uri.getPath()).delete();
+                getContext().getContentResolver().delete(uri, null, null);
             }
         }
     }
