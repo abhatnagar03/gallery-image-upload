@@ -20,9 +20,9 @@ The app provides a gallery with feature to upload an image by clicking through d
 
 ## Libraries used in the sample project
 
-Butterknife - For view injection
-Glide - For lazy load and caching for images
-OpenCV - For cropping the image
+- Butterknife - For view injection
+- Glide - For lazy load and caching for images
+- OpenCV - For cropping the image
 
 ## Prerequisites
 
