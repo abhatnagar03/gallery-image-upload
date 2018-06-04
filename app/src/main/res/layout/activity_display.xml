@@ -29,7 +29,8 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/save_gallery"
             android:text="@string/save_to_gallery"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold"
             android:textSize="@dimen/text_size_heading_13.5" />
     </RelativeLayout>
 </FrameLayout>

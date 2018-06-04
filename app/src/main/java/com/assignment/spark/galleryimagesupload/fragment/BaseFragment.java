@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import com.assignment.spark.galleryimagesupload.R;
 import com.assignment.spark.galleryimagesupload.adapter.BaseAdapter;
 import com.assignment.spark.galleryimagesupload.interfaces.INavigate;
+import com.assignment.spark.galleryimagesupload.layoutmanager.GridAutoFitLayoutManager;
 import com.assignment.spark.galleryimagesupload.presenter.MainPresenterImpl;
 import com.assignment.spark.galleryimagesupload.presenter.RecyclerItemClickListener;
 import com.assignment.spark.galleryimagesupload.utils.CameraUtils;
@@ -69,9 +70,10 @@ public abstract class BaseFragment extends Fragment implements MainGalleryView,
     private Uri uri;
 
     private RecyclerView.Adapter adapter;
-    protected GridLayoutManager layoutManager;
+    protected GridAutoFitLayoutManager layoutManager;
     private INavigate iNavigate;
     private String mCurrentPhotoPath;
+    private boolean firstResume;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -87,13 +89,29 @@ public abstract class BaseFragment extends Fragment implements MainGalleryView,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mainPresenter.loadInitialData();
+        firstResume = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mainPresenter.loadInitialData();
+        if(firstResume) {
+            firstResume = false;
+        } else {
+            refreshGallery();
+        }
     }
+
+    public void refreshGallery() {
+        File file = getEnvFilePath();
+        ((BaseAdapter) adapter).addAll(Arrays.asList(file.listFiles()));
+        recyclerView.setAdapter(adapter);
+        if (adapter instanceof BaseAdapter) {
+            ((BaseAdapter) adapter).setRecyclerItemClickListener(this);
+        }
+    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -316,6 +334,7 @@ public abstract class BaseFragment extends Fragment implements MainGalleryView,
 
     @Override
     public void openDeviceGallery(File file) {
+        uri = FileProvider.getUriForFile(getContext(), Constants.FILE_AUTHORITY, file);
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -345,16 +364,20 @@ public abstract class BaseFragment extends Fragment implements MainGalleryView,
                 getContext().getContentResolver().delete(uri, null, null);
             }
         } else if(requestCode == PICK_IMAGE_REQUEST) {
-            Bitmap mGalleryBitmap = null;
-            try {
-                mGalleryBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (null != mGalleryBitmap) {
-                CameraUtils.saveEnhancedBitmap(mGalleryBitmap, mCurrentPhotoPath);
-                mGalleryBitmap.recycle();
-                mainPresenter.onPhotoClicked();
+            if (resultCode == RESULT_OK) {
+                Bitmap mGalleryBitmap = null;
+                try {
+                    mGalleryBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), data.getData());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (null != mGalleryBitmap) {
+                    CameraUtils.saveEnhancedBitmap(mGalleryBitmap, mCurrentPhotoPath);
+                    mGalleryBitmap.recycle();
+                    mainPresenter.onPhotoClicked();
+                }
+            } else {
+                getContext().getContentResolver().delete(uri, null, null);
             }
         }
     }

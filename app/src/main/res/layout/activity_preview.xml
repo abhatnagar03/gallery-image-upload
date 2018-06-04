@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_margin="@dimen/activity_margin_half"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/activity_margin_half"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/preview"
@@ -33,11 +32,12 @@
             android:id="@+id/crop_accept_btn_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_below="@+id/rotate_btn"
+            android:layout_centerHorizontal="true"
             android:text="@string/rotate"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="@dimen/text_size_heading_13.5" />
+            android:textColor="@android:color/holo_red_light"
+            android:textSize="@dimen/text_size_heading_13.5"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -55,11 +55,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_below="@+id/crop_btn"
+            android:layout_centerHorizontal="true"
             android:text="@string/accept_crop"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="@dimen/text_size_heading_13.5" />
+            android:textColor="@android:color/holo_red_light"
+            android:textSize="@dimen/text_size_heading_13.5"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -77,10 +78,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_below="@+id/accept_btn"
+            android:layout_centerHorizontal="true"
             android:text="@string/accept_original"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="@dimen/text_size_heading_13.5" />
+            android:textColor="@android:color/holo_red_light"
+            android:textSize="@dimen/text_size_heading_13.5"
+            android:textStyle="bold" />
     </RelativeLayout>
 </FrameLayout>

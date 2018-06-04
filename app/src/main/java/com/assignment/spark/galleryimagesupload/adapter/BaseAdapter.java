@@ -93,10 +93,8 @@ public class BaseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyItemInserted(itemList.size() - 1);
     }
 
-    public void addAll(List<File> moveResults) {
-        for (File result : moveResults) {
-            add(result);
-        }
+    public void addAll(List<File> files) {
+        itemList = files;
     }
 
     private void remove(File r) {

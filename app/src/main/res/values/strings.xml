@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Image Gallery</string>
+    <string name="app_name">Gallery Image Upload</string>
     <string name="without_permissions">Without Permissions</string>
     <string name="it_looks_you_locked_permissions_">
         It looks you didn\'t allow this app to use your
